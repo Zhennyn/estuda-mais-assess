@@ -1,0 +1,142 @@
+
+import React from "react";
+import { useParams, Link } from "react-router-dom";
+import { useExam } from "@/context/ExamContext";
+import { Button } from "@/components/ui/button";
+
+export const ExamResult = () => {
+  const { submissionId } = useParams();
+  const { examSubmissions, getExamById } = useExam();
+  
+  const submission = submissionId 
+    ? examSubmissions.find(s => s.id === submissionId) 
+    : undefined;
+    
+  const exam = submission 
+    ? getExamById(submission.examId) 
+    : undefined;
+    
+  if (!submission || !exam) {
+    return (
+      <div className="text-center py-8">
+        <h3 className="text-xl font-medium text-gray-600">Resultado não encontrado.</h3>
+        <Link to="/student/dashboard" className="mt-4 inline-block">
+          <Button>Voltar para o Dashboard</Button>
+        </Link>
+      </div>
+    );
+  }
+  
+  // Calculate correct answers and score
+  const totalQuestions = exam.questions.length;
+  const correctAnswers = submission.answers.filter(answer => {
+    const question = exam.questions.find(q => q.id === answer.questionId);
+    if (!question) return false;
+    
+    const correctOption = question.options.find(o => o.isCorrect);
+    return correctOption && correctOption.id === answer.selectedOptionId;
+  }).length;
+  
+  const score = submission.score || 0;
+  
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">{exam.title} - Resultado</h1>
+        <p className="text-gray-600 mt-1">{exam.description}</p>
+      </div>
+      
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <div className="flex justify-between items-center pb-4 border-b">
+          <h2 className="text-lg font-medium">Pontuação</h2>
+          <div className="text-2xl font-bold">{score.toFixed(1)}%</div>
+        </div>
+        
+        <div className="py-4 grid grid-cols-2 gap-4 text-center">
+          <div>
+            <div className="text-gray-500">Questões</div>
+            <div className="text-xl font-medium">{correctAnswers} / {totalQuestions}</div>
+          </div>
+          <div>
+            <div className="text-gray-500">Acertos</div>
+            <div className="text-xl font-medium">{correctAnswers}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold">Detalhes da Prova</h2>
+        
+        {exam.questions.map((question, qIndex) => {
+          const userAnswer = submission.answers.find(a => a.questionId === question.id);
+          const userSelectedOption = userAnswer 
+            ? question.options.find(o => o.id === userAnswer.selectedOptionId) 
+            : undefined;
+            
+          const correctOption = question.options.find(o => o.isCorrect);
+          const isCorrect = userSelectedOption && correctOption && userSelectedOption.id === correctOption.id;
+          
+          return (
+            <div key={question.id} className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-start">
+                <div className="mr-3 text-gray-500 font-medium">{qIndex + 1}.</div>
+                <div className="flex-1">
+                  <div className="font-medium mb-3">{question.text}</div>
+                  
+                  <div className="space-y-2 ml-1">
+                    {question.options.map((option, oIndex) => {
+                      const isUserSelection = userSelectedOption && userSelectedOption.id === option.id;
+                      const isCorrectOption = option.isCorrect;
+                      
+                      let bgColor = "";
+                      if (isUserSelection && isCorrectOption) {
+                        bgColor = "bg-green-100 border-green-300";
+                      } else if (isUserSelection && !isCorrectOption) {
+                        bgColor = "bg-red-100 border-red-300";
+                      } else if (isCorrectOption) {
+                        bgColor = "bg-green-50 border-green-200";
+                      }
+                      
+                      return (
+                        <div 
+                          key={option.id} 
+                          className={`p-2 border rounded ${bgColor}`}
+                        >
+                          <div className="flex items-center">
+                            <div className="w-6 text-gray-500">{String.fromCharCode(65 + oIndex)}.</div>
+                            <span>{option.text}</span>
+                            {isCorrectOption && (
+                              <span className="ml-2 text-green-600 text-sm">✓ Correta</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                
+                <div className="ml-4 flex-shrink-0">
+                  {isCorrect ? (
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                      ✓
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                      ✗
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      <div className="mt-8">
+        <Link to="/student/dashboard">
+          <Button>Voltar ao Dashboard</Button>
+        </Link>
+      </div>
+    </div>
+  );
+};

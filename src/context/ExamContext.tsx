@@ -1,0 +1,94 @@
+
+import React, { createContext, useState, useContext, ReactNode } from "react";
+import { Exam, ExamSubmission } from "@/types";
+
+type ExamContextType = {
+  exams: Exam[];
+  examSubmissions: ExamSubmission[];
+  createExam: (exam: Exam) => void;
+  submitExam: (submission: ExamSubmission) => void;
+  getExamById: (id: string) => Exam | undefined;
+  getExamsByProfessorId: (professorId: string) => Exam[];
+  getExamsForStudent: () => Exam[];
+  getSubmissionsByExamId: (examId: string) => ExamSubmission[];
+  getSubmissionsByStudentId: (studentId: string) => ExamSubmission[];
+};
+
+const ExamContext = createContext<ExamContextType | undefined>(undefined);
+
+export const ExamProvider = ({ children }: { children: ReactNode }) => {
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [examSubmissions, setExamSubmissions] = useState<ExamSubmission[]>([]);
+
+  const createExam = (exam: Exam) => {
+    setExams([...exams, exam]);
+  };
+
+  const submitExam = (submission: ExamSubmission) => {
+    // Calculate score
+    const exam = getExamById(submission.examId);
+    if (!exam) return;
+    
+    let correctAnswers = 0;
+    submission.answers.forEach(answer => {
+      const question = exam.questions.find(q => q.id === answer.questionId);
+      if (question) {
+        const correctOption = question.options.find(o => o.isCorrect);
+        if (correctOption && correctOption.id === answer.selectedOptionId) {
+          correctAnswers++;
+        }
+      }
+    });
+    
+    const score = (correctAnswers / exam.questions.length) * 100;
+    const submissionWithScore = { ...submission, score };
+    
+    setExamSubmissions([...examSubmissions, submissionWithScore]);
+  };
+
+  const getExamById = (id: string) => {
+    return exams.find(exam => exam.id === id);
+  };
+
+  const getExamsByProfessorId = (professorId: string) => {
+    return exams.filter(exam => exam.createdBy === professorId);
+  };
+
+  const getExamsForStudent = () => {
+    // In a real app, we would filter exams assigned to this student
+    // For now, return all exams
+    return exams;
+  };
+
+  const getSubmissionsByExamId = (examId: string) => {
+    return examSubmissions.filter(submission => submission.examId === examId);
+  };
+
+  const getSubmissionsByStudentId = (studentId: string) => {
+    return examSubmissions.filter(submission => submission.studentId === studentId);
+  };
+
+  return (
+    <ExamContext.Provider value={{
+      exams,
+      examSubmissions,
+      createExam,
+      submitExam,
+      getExamById,
+      getExamsByProfessorId,
+      getExamsForStudent,
+      getSubmissionsByExamId,
+      getSubmissionsByStudentId
+    }}>
+      {children}
+    </ExamContext.Provider>
+  );
+};
+
+export const useExam = () => {
+  const context = useContext(ExamContext);
+  if (context === undefined) {
+    throw new Error("useExam must be used within an ExamProvider");
+  }
+  return context;
+};

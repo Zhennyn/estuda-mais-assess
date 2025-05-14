@@ -1,26 +1,120 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { UserProvider } from "@/context/UserContext";
+import { ExamProvider } from "@/context/ExamContext";
+
 import Index from "./pages/Index";
+import Login from "./pages/Login";
+import ProfessorDashboard from "./pages/ProfessorDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
+import CreateExam from "./pages/CreateExam";
+import TakeExam from "./pages/TakeExam";
+import ExamResultPage from "./pages/ExamResult";
 import NotFound from "./pages/NotFound";
+import { useUser } from "./context/UserContext";
 
 const queryClient = new QueryClient();
 
+// Protected route wrapper
+const ProtectedRoute = ({ 
+  children, 
+  allowedRole 
+}: { 
+  children: JSX.Element,
+  allowedRole?: "professor" | "student"
+}) => {
+  const { user } = useUser();
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (allowedRole && user.role !== allowedRole) {
+    return <Navigate to={`/${user.role}/dashboard`} replace />;
+  }
+  
+  return children;
+};
+
+// Main app component
+const AppRoutes = () => (
+  <Routes>
+    <Route path="/" element={<Index />} />
+    <Route path="/login" element={<Login />} />
+    
+    {/* Professor routes */}
+    <Route 
+      path="/professor/dashboard" 
+      element={
+        <ProtectedRoute allowedRole="professor">
+          <ProfessorDashboard />
+        </ProtectedRoute>
+      } 
+    />
+    <Route 
+      path="/professor/create-exam" 
+      element={
+        <ProtectedRoute allowedRole="professor">
+          <CreateExam />
+        </ProtectedRoute>
+      } 
+    />
+    <Route 
+      path="/professor/exam/:examId" 
+      element={
+        <ProtectedRoute allowedRole="professor">
+          <div>Detalhes da Prova (A implementar)</div>
+        </ProtectedRoute>
+      } 
+    />
+    
+    {/* Student routes */}
+    <Route 
+      path="/student/dashboard" 
+      element={
+        <ProtectedRoute allowedRole="student">
+          <StudentDashboard />
+        </ProtectedRoute>
+      } 
+    />
+    <Route 
+      path="/student/exam/:examId" 
+      element={
+        <ProtectedRoute allowedRole="student">
+          <TakeExam />
+        </ProtectedRoute>
+      } 
+    />
+    <Route 
+      path="/student/result/:submissionId" 
+      element={
+        <ProtectedRoute allowedRole="student">
+          <ExamResultPage />
+        </ProtectedRoute>
+      } 
+    />
+    
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <UserProvider>
+      <ExamProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </TooltipProvider>
+      </ExamProvider>
+    </UserProvider>
   </QueryClientProvider>
 );
 
