@@ -26,21 +26,21 @@ export const ExamProvider = ({ children }: { children: ReactNode }) => {
 
   const submitExam = (submission: ExamSubmission) => {
     // Calculate score
-    const exam = getExamById(submission.examId);
+    const exam = getExamById(submission.exam_id);
     if (!exam) return;
     
     let correctAnswers = 0;
     submission.answers.forEach(answer => {
-      const question = exam.questions.find(q => q.id === answer.questionId);
+      const question = exam.questions.find(q => q.id === answer.question_id);
       if (question) {
-        const correctOption = question.options.find(o => o.isCorrect);
-        if (correctOption && correctOption.id === answer.selectedOptionId) {
+        const correctOption = question.options.find(o => o.is_correct);
+        if (correctOption && correctOption.id === answer.selected_option_id) {
           correctAnswers++;
         }
       }
     });
     
-    const score = (correctAnswers / exam.questions.length) * 100;
+    const score = exam.questions.length > 0 ? (correctAnswers / exam.questions.length) * 100 : 0;
     const submissionWithScore = { ...submission, score };
     
     setExamSubmissions([...examSubmissions, submissionWithScore]);
@@ -51,7 +51,7 @@ export const ExamProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getExamsByProfessorId = (professorId: string) => {
-    return exams.filter(exam => exam.createdBy === professorId);
+    return exams.filter(exam => exam.created_by === professorId);
   };
 
   const getExamsForStudent = () => {
@@ -61,11 +61,11 @@ export const ExamProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getSubmissionsByExamId = (examId: string) => {
-    return examSubmissions.filter(submission => submission.examId === examId);
+    return examSubmissions.filter(submission => submission.exam_id === examId);
   };
 
   const getSubmissionsByStudentId = (studentId: string) => {
-    return examSubmissions.filter(submission => submission.studentId === studentId);
+    return examSubmissions.filter(submission => submission.student_id === studentId);
   };
 
   return (

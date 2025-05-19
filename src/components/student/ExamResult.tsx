@@ -13,7 +13,7 @@ export const ExamResult = () => {
     : undefined;
     
   const exam = submission 
-    ? getExamById(submission.examId) 
+    ? getExamById(submission.exam_id) 
     : undefined;
     
   if (!submission || !exam) {
@@ -30,11 +30,11 @@ export const ExamResult = () => {
   // Calculate correct answers and score
   const totalQuestions = exam.questions.length;
   const correctAnswers = submission.answers.filter(answer => {
-    const question = exam.questions.find(q => q.id === answer.questionId);
+    const question = exam.questions.find(q => q.id === answer.question_id);
     if (!question) return false;
     
-    const correctOption = question.options.find(o => o.isCorrect);
-    return correctOption && correctOption.id === answer.selectedOptionId;
+    const correctOption = question.options.find(o => o.is_correct);
+    return correctOption && correctOption.id === answer.selected_option_id;
   }).length;
   
   const score = submission.score || 0;
@@ -68,12 +68,12 @@ export const ExamResult = () => {
         <h2 className="text-xl font-bold">Detalhes da Prova</h2>
         
         {exam.questions.map((question, qIndex) => {
-          const userAnswer = submission.answers.find(a => a.questionId === question.id);
+          const userAnswer = submission.answers.find(a => a.question_id === question.id);
           const userSelectedOption = userAnswer 
-            ? question.options.find(o => o.id === userAnswer.selectedOptionId) 
+            ? question.options.find(o => o.id === userAnswer.selected_option_id) 
             : undefined;
             
-          const correctOption = question.options.find(o => o.isCorrect);
+          const correctOption = question.options.find(o => o.is_correct);
           const isCorrect = userSelectedOption && correctOption && userSelectedOption.id === correctOption.id;
           
           return (
@@ -86,7 +86,7 @@ export const ExamResult = () => {
                   <div className="space-y-2 ml-1">
                     {question.options.map((option, oIndex) => {
                       const isUserSelection = userSelectedOption && userSelectedOption.id === option.id;
-                      const isCorrectOption = option.isCorrect;
+                      const isCorrectOption = option.is_correct;
                       
                       let bgColor = "";
                       if (isUserSelection && isCorrectOption) {

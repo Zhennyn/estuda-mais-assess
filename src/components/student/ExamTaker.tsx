@@ -6,7 +6,7 @@ import { useUser } from "@/context/UserContext";
 import { useExam } from "@/context/ExamContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Question } from "@/types";
+import { Question, Answer, ExamSubmission } from "@/types";
 
 export const ExamTaker = () => {
   const { examId } = useParams();
@@ -16,7 +16,7 @@ export const ExamTaker = () => {
   const { toast } = useToast();
   
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<{ questionId: string, selectedOptionId: string }[]>([]);
+  const [answers, setAnswers] = useState<Omit<Answer, 'id' | 'submission_id' | 'created_at'>[]>([]);
   const [timeLeft, setTimeLeft] = useState(0);
   
   const exam = examId ? getExamById(examId) : undefined;
@@ -28,7 +28,7 @@ export const ExamTaker = () => {
   }, [exam]);
   
   useEffect(() => {
-    if (timeLeft <= 0) {
+    if (timeLeft <= 0 && exam) { // Ensure exam is defined before submitting
       handleSubmitExam();
       return;
     }
@@ -38,7 +38,7 @@ export const ExamTaker = () => {
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, [timeLeft, exam]); // Add exam to dependency array
   
   if (!exam || !user) {
     return <div>Carregando...</div>;
@@ -54,19 +54,19 @@ export const ExamTaker = () => {
   
   const handleAnswer = (questionId: string, optionId: string) => {
     const newAnswers = [...answers];
-    const existingAnswerIndex = answers.findIndex(a => a.questionId === questionId);
+    const existingAnswerIndex = answers.findIndex(a => a.question_id === questionId);
     
     if (existingAnswerIndex >= 0) {
-      newAnswers[existingAnswerIndex].selectedOptionId = optionId;
+      newAnswers[existingAnswerIndex].selected_option_id = optionId;
     } else {
-      newAnswers.push({ questionId, selectedOptionId: optionId });
+      newAnswers.push({ question_id: questionId, selected_option_id: optionId });
     }
     
     setAnswers(newAnswers);
   };
   
   const getCurrentAnswer = (questionId: string) => {
-    return answers.find(a => a.questionId === questionId)?.selectedOptionId;
+    return answers.find(a => a.question_id === questionId)?.selected_option_id;
   };
   
   const handleNextQuestion = () => {
@@ -82,18 +82,30 @@ export const ExamTaker = () => {
   };
   
   const handleSubmitExam = () => {
+    if (!exam || !user) return; // Ensure exam and user are defined
+
     // Check if all questions are answered
     if (answers.length < exam.questions.length) {
       const isConfirmed = window.confirm("Você não respondeu todas as questões. Tem certeza que deseja enviar a prova?");
       if (!isConfirmed) return;
     }
     
-    const submission = {
+    const submissionId = uuidv4();
+    const finalAnswers: Answer[] = answers.map(a => ({
       id: uuidv4(),
-      examId: exam.id,
-      studentId: user.id,
-      submittedAt: new Date(),
-      answers
+      submission_id: submissionId,
+      question_id: a.question_id,
+      selected_option_id: a.selected_option_id,
+      created_at: new Date().toISOString(),
+    }));
+
+    const submission: ExamSubmission = {
+      id: submissionId,
+      exam_id: exam.id,
+      student_id: user.id,
+      submitted_at: new Date().toISOString(),
+      answers: finalAnswers,
+      score: 0, // Score will be calculated in ExamContext
     };
     
     submitExam(submission);
@@ -173,7 +185,7 @@ export const ExamTaker = () => {
       
       <div className="mt-6 grid grid-cols-10 gap-2">
         {exam.questions.map((question: Question, index: number) => {
-          const isAnswered = answers.some(a => a.questionId === question.id);
+          const isAnswered = answers.some(a => a.question_id === question.id);
           return (
             <Button
               key={question.id}

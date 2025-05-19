@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/context/UserContext";
 import { useExam } from "@/context/ExamContext";
-import { Question } from "@/types";
+import { Question, QuestionOption } from "@/types"; // Changed import slightly for clarity
 
 export const ExamCreator = () => {
   const { toast } = useToast();
@@ -18,27 +18,30 @@ export const ExamCreator = () => {
   const [examDescription, setExamDescription] = useState("");
   const [examDuration, setExamDuration] = useState(60); // default 60 minutes
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState<Question>({
+  
+  // Initialize currentQuestion with QuestionOption structure
+  const [currentQuestion, setCurrentQuestion] = useState<Omit<Question, 'exam_id' | 'created_at' | 'updated_at'>>({
     id: uuidv4(),
     text: "",
     options: [
-      { id: uuidv4(), text: "", isCorrect: false },
-      { id: uuidv4(), text: "", isCorrect: false },
-      { id: uuidv4(), text: "", isCorrect: false },
-      { id: uuidv4(), text: "", isCorrect: false }
+      { id: uuidv4(), question_id: "", text: "", is_correct: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: uuidv4(), question_id: "", text: "", is_correct: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: uuidv4(), question_id: "", text: "", is_correct: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: uuidv4(), question_id: "", text: "", is_correct: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
     ]
   });
 
   const handleOptionChange = (index: number, value: string) => {
-    const updatedOptions = [...currentQuestion.options];
-    updatedOptions[index] = { ...updatedOptions[index], text: value };
+    const updatedOptions = currentQuestion.options.map((opt, i) => 
+      i === index ? { ...opt, text: value } : opt
+    );
     setCurrentQuestion({ ...currentQuestion, options: updatedOptions });
   };
 
   const handleCorrectOptionChange = (index: number) => {
     const updatedOptions = currentQuestion.options.map((option, i) => ({
       ...option,
-      isCorrect: i === index
+      is_correct: i === index
     }));
     setCurrentQuestion({ ...currentQuestion, options: updatedOptions });
   };
@@ -66,7 +69,7 @@ export const ExamCreator = () => {
     }
 
     // Check if there's a correct option
-    const hasCorrect = currentQuestion.options.some(opt => opt.isCorrect);
+    const hasCorrect = currentQuestion.options.some(opt => opt.is_correct);
     if (!hasCorrect) {
       toast({
         title: "Erro",
@@ -76,18 +79,33 @@ export const ExamCreator = () => {
       return;
     }
 
-    // Add question to the list
-    setQuestions([...questions, currentQuestion]);
+    const newQuestion: Question = {
+      ...currentQuestion,
+      id: currentQuestion.id || uuidv4(), // ensure id is present
+      exam_id: "", // This will be set when the exam is created, or handle differently if questions are tied before exam save
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      options: currentQuestion.options.map(opt => ({
+        ...opt,
+        id: opt.id || uuidv4(),
+        question_id: currentQuestion.id || "", // This should ideally be the final question_id
+        is_correct: opt.is_correct, 
+        created_at: opt.created_at || new Date().toISOString(),
+        updated_at: opt.updated_at || new Date().toISOString(),
+      }))
+    };
+
+    setQuestions([...questions, newQuestion]);
     
     // Reset current question
     setCurrentQuestion({
       id: uuidv4(),
       text: "",
       options: [
-        { id: uuidv4(), text: "", isCorrect: false },
-        { id: uuidv4(), text: "", isCorrect: false },
-        { id: uuidv4(), text: "", isCorrect: false },
-        { id: uuidv4(), text: "", isCorrect: false }
+        { id: uuidv4(), question_id: "", text: "", is_correct: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        { id: uuidv4(), question_id: "", text: "", is_correct: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        { id: uuidv4(), question_id: "", text: "", is_correct: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        { id: uuidv4(), question_id: "", text: "", is_correct: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
       ]
     });
 
@@ -124,15 +142,28 @@ export const ExamCreator = () => {
     }
 
     // Create the exam
-    createExam({
+    const examToCreate = {
       id: uuidv4(),
       title: examTitle,
       description: examDescription,
-      createdBy: user.id,
-      createdAt: new Date(),
+      created_by: user.id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       duration: examDuration,
-      questions: questions
-    });
+      questions: questions.map(q => ({
+        ...q,
+        exam_id: q.exam_id || "", // This should be the ID of the exam being created.
+                                  // The context or backend would normally handle this linkage.
+                                  // For now, ensure it matches the Question type structure.
+        options: q.options.map(opt => ({
+            ...opt,
+            question_id: q.id, // Link option to its question
+        }))
+      }))
+    };
+    
+    createExam(examToCreate);
+
 
     // Reset form
     setExamTitle("");
@@ -205,7 +236,7 @@ export const ExamCreator = () => {
                 <input
                   type="radio"
                   name="correctOption"
-                  checked={option.isCorrect}
+                  checked={option.is_correct}
                   onChange={() => handleCorrectOptionChange(index)}
                 />
                 <Input
@@ -247,9 +278,9 @@ export const ExamCreator = () => {
                 <div className="ml-4 space-y-1">
                   {question.options.map((option, oIndex) => (
                     <div key={option.id} className="flex items-center">
-                      <span className={option.isCorrect ? "text-green-600 font-medium" : ""}>
+                      <span className={option.is_correct ? "text-green-600 font-medium" : ""}>
                         {String.fromCharCode(65 + oIndex)}. {option.text} 
-                        {option.isCorrect && " ✓"}
+                        {option.is_correct && " ✓"}
                       </span>
                     </div>
                   ))}

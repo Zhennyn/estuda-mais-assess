@@ -43,7 +43,7 @@ export const ExamList = () => {
               <div className="mt-3 text-sm text-gray-500">
                 <div>Duração: {exam.duration} minutos</div>
                 <div>Questões: {exam.questions.length}</div>
-                <div>Criado: {formatDistanceToNow(new Date(exam.createdAt), { 
+                <div>Criado: {formatDistanceToNow(new Date(exam.created_at), { 
                   addSuffix: true,
                   locale: ptBR 
                 })}</div>

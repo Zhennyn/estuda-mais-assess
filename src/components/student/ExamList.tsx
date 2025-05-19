@@ -17,7 +17,7 @@ export const StudentExamList = () => {
   const submissions = getSubmissionsByStudentId(user.id);
   
   // Filter out exams that have already been submitted
-  const submittedExamIds = submissions.map(s => s.examId);
+  const submittedExamIds = submissions.map(s => s.exam_id);
   const availableExams = exams.filter(exam => !submittedExamIds.includes(exam.id));
   
   if (exams.length === 0) {
@@ -47,7 +47,7 @@ export const StudentExamList = () => {
                 <div className="mt-3 text-sm text-gray-500">
                   <div>Duração: {exam.duration} minutos</div>
                   <div>Questões: {exam.questions.length}</div>
-                  <div>Criado: {formatDistanceToNow(new Date(exam.createdAt), { 
+                  <div>Criado: {formatDistanceToNow(new Date(exam.created_at), { 
                     addSuffix: true,
                     locale: ptBR 
                   })}</div>
@@ -70,7 +70,7 @@ export const StudentExamList = () => {
           
           <div className="grid gap-4 md:grid-cols-2">
             {submissions.map(submission => {
-              const exam = exams.find(e => e.id === submission.examId);
+              const exam = exams.find(e => e.id === submission.exam_id);
               if (!exam) return null;
               
               return (
@@ -78,7 +78,7 @@ export const StudentExamList = () => {
                   <h3 className="text-lg font-semibold">{exam.title}</h3>
                   
                   <div className="mt-3 text-sm text-gray-500">
-                    <div>Concluído: {formatDistanceToNow(new Date(submission.submittedAt), { 
+                    <div>Concluído: {formatDistanceToNow(new Date(submission.submitted_at), { 
                       addSuffix: true,
                       locale: ptBR 
                     })}</div>
