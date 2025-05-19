@@ -61,7 +61,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+        'lovable-primary': '#9b87f5', // Primary Purple
+        'lovable-primary-foreground': '#FFFFFF',
+        'lovable-secondary': '#7E69AB', // Secondary Purple
+        'lovable-secondary-foreground': '#FFFFFF',
+        'lovable-destructive': '#ea384c', // Red
+        'lovable-destructive-foreground': '#FFFFFF',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
