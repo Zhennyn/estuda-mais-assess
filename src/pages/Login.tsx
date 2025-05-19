@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -7,13 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/context/UserContext";
-import { v4 as uuidv4 } from "uuid";
-import { User } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { login } = useUser();
+  const { user, isLoading, session } = useUser();
   const [tab, setTab] = useState<"login" | "register">("login");
   
   const [loginData, setLoginData] = useState({
@@ -28,59 +26,83 @@ const Login = () => {
     role: "student" as "professor" | "student"
   });
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Mock login logic - in a real app, you would validate against a backend
-    if (loginData.email && loginData.password) {
-      const user: User = {
-        id: uuidv4(),
-        name: loginData.email.split('@')[0], // Just for demo purposes
-        email: loginData.email,
-        role: loginData.email.includes("professor") ? "professor" : "student"
-      };
-      
-      login(user);
-      toast({
-        title: "Login realizado com sucesso!",
-        description: `Bem-vindo, ${user.name}!`
-      });
-      
+  useEffect(() => {
+    if (!isLoading && user && session) {
       navigate(user.role === "professor" ? "/professor/dashboard" : "/student/dashboard");
-    } else {
+    }
+  }, [user, isLoading, session, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginData.email || !loginData.password) {
       toast({
         title: "Erro ao fazer login",
         description: "Por favor, preencha todos os campos.",
         variant: "destructive"
       });
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginData.email,
+      password: loginData.password,
+    });
+
+    if (error) {
+      toast({
+        title: "Erro ao fazer login",
+        description: error.message || "Verifique suas credenciais.",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Login em progresso...",
+        description: "Você será redirecionado em breve."
+      });
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock register logic
-    if (registerData.name && registerData.email && registerData.password) {
-      const user: User = {
-        id: uuidv4(),
-        name: registerData.name,
-        email: registerData.email,
-        role: registerData.role
-      };
-      
-      login(user);
-      toast({
-        title: "Cadastro realizado com sucesso!",
-        description: `Bem-vindo, ${user.name}!`
-      });
-      
-      navigate(user.role === "professor" ? "/professor/dashboard" : "/student/dashboard");
-    } else {
+    if (!registerData.name || !registerData.email || !registerData.password) {
       toast({
         title: "Erro ao fazer cadastro",
         description: "Por favor, preencha todos os campos.",
         variant: "destructive"
       });
+      return;
+    }
+
+    const { data: signUpData, error } = await supabase.auth.signUp({
+      email: registerData.email,
+      password: registerData.password,
+      options: {
+        data: {
+          name: registerData.name,
+          role: registerData.role 
+        }
+      }
+    });
+
+    if (error) {
+      toast({
+        title: "Erro ao fazer cadastro",
+        description: error.message || "Não foi possível criar a conta.",
+        variant: "destructive"
+      });
+    } else if (signUpData.user) {
+        if (signUpData.user.identities && signUpData.user.identities.length === 0) {
+            toast({
+                title: "Erro ao fazer cadastro",
+                description: "Este e-mail já está em uso. Tente fazer login.",
+                variant: "destructive",
+            });
+        } else {
+            toast({
+                title: "Cadastro realizado com sucesso!",
+                description: "Bem-vindo! Você será redirecionado."
+            });
+        }
     }
   };
 
@@ -103,9 +125,9 @@ const Login = () => {
               <form onSubmit={handleLogin}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email-login">Email</Label>
                     <Input 
-                      id="email" 
+                      id="email-login" 
                       type="email" 
                       placeholder="seu@email.com" 
                       value={loginData.email}
@@ -114,16 +136,18 @@ const Login = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
+                    <Label htmlFor="password-login">Senha</Label>
                     <Input 
-                      id="password" 
+                      id="password-login" 
                       type="password" 
                       value={loginData.password}
                       onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                     />
                   </div>
                   
-                  <Button type="submit" className="w-full">Entrar</Button>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Entrando...' : 'Entrar'}
+                  </Button>
                 </div>
               </form>
             </TabsContent>
@@ -132,9 +156,9 @@ const Login = () => {
               <form onSubmit={handleRegister}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nome</Label>
+                    <Label htmlFor="name-register">Nome</Label>
                     <Input 
-                      id="name" 
+                      id="name-register" 
                       placeholder="Seu nome completo" 
                       value={registerData.name}
                       onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
@@ -142,9 +166,9 @@ const Login = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email-register">Email</Label>
                     <Input 
-                      id="email" 
+                      id="email-register" 
                       type="email" 
                       placeholder="seu@email.com" 
                       value={registerData.email}
@@ -153,9 +177,9 @@ const Login = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
+                    <Label htmlFor="password-register">Senha</Label>
                     <Input 
-                      id="password" 
+                      id="password-register" 
                       type="password" 
                       value={registerData.password}
                       onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
@@ -169,6 +193,7 @@ const Login = () => {
                         <input 
                           type="radio" 
                           name="role" 
+                          value="student"
                           checked={registerData.role === "student"} 
                           onChange={() => setRegisterData({...registerData, role: "student"})} 
                         />
@@ -179,6 +204,7 @@ const Login = () => {
                         <input 
                           type="radio" 
                           name="role" 
+                          value="professor"
                           checked={registerData.role === "professor"} 
                           onChange={() => setRegisterData({...registerData, role: "professor"})} 
                         />
@@ -187,7 +213,9 @@ const Login = () => {
                     </div>
                   </div>
                   
-                  <Button type="submit" className="w-full">Cadastrar</Button>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Cadastrando...' : 'Cadastrar'}
+                  </Button>
                 </div>
               </form>
             </TabsContent>
