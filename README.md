@@ -28,7 +28,7 @@ Você pode acessar a aplicação diretamente pela internet:
 
 ---
 
-### 📊 Painel de Progresso
+### 📊 Cadastro de provas
 
 ![Painel de Progresso](public/images/painel-progresso.png)
 
@@ -71,7 +71,7 @@ estuda-mais-assess/
 
 ---
 
-#🚀 Como Rodar Localmente
+🚀 Como Rodar Localmente
 
   Pré-requisitos
   Ter o Bun instalado
@@ -95,10 +95,18 @@ bun run dev
 
 ---
 
-#👤 Autores
+👤 Autores
 
-Matheus Lima Menezes
-Eduardo Lopes Ferreira Filho
-Abraão Joventino Crispiano
-André Luiz Fernandes
-Lucas José Vicentini
+  - Matheus Lima Menezes
+  - Eduardo Lopes Ferreira Filho
+  - Abraão Joventino Crispiano
+  - André Luiz Fernandes
+  - Lucas José Vicentini
+
+👀 Observações
+
+  - O projeto ainda está em desenvolvimento mas pela falta de tempo devido a bugs e sistemas caindo sofrerá uma leve pausa onde originalmente seria um app acabou virando um app.
+  - Sendo um App nosso meio de emula-lo no computador seria utilizando expo porem ocorreram conflitos tanto do emulador quanto do código em si.
+  - Atualizações futuras a serem feitas serão colocas a teste primeiro e depois serão lançadas.
+  - Devido a pouca quantidade de tempo foi necessário o uso da platafroma lovable para correção de alguns bugs problematicos e para hospedagem utilizamos o vercel
+
