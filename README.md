@@ -8,13 +8,12 @@
 
 Você pode acessar a aplicação diretamente pela internet:
 
-👉 [estuda-mais-assess.vercel.app](https://evalplus-smart-assess.vercel.app)
+👉 [estuda-mais-assess.vercel.app](https://estuda-mais-acess.vercel.app)
 
 ---
 
 ## 🖼️ Imagens de Demonstração
 
-> ⚠️ Para que as imagens apareçam corretamente, salve os arquivos na pasta `public/images/` conforme os nomes abaixo.
 
 ### 📌 Tela Inicial
 
@@ -22,15 +21,27 @@ Você pode acessar a aplicação diretamente pela internet:
 
 ---
 
-### 📝 Cadastro de Estudos
+### 📝 Área de Login
 
-![Cadastro de Estudos](public/images/cadastro-estudos.png)
+![Cadastro de Estudos](public/images/login.png)
 
 ---
 
-### 📊 Cadastro de provas
+### 📊 Área de Cadastro
 
-![Painel de Progresso](public/images/painel-progresso.png)
+![Painel de Progresso](public/images/cadastro.png)
+
+---
+
+### 📝 Área de Alunos
+
+![Cadastro de Estudos](public/images/tela-aluno.png)
+
+---
+
+### 📝 Área do professor
+
+![Cadastro de Estudos](public/images/tela-professor.png)
 
 ---
 
