@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/context/UserContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 
 const Login = () => {
   const { toast } = useToast();
@@ -47,21 +48,30 @@ const Login = () => {
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: loginData.email,
-      password: loginData.password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
+      });
 
-    if (error) {
+      if (error) {
+        toast({
+          title: "Erro ao fazer login",
+          description: error.message || "Verifique suas credenciais.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Login em progresso...",
+          description: "Você será redirecionado em breve."
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Erro ao fazer login",
-        description: error.message || "Verifique suas credenciais.",
+        description: "Ocorreu um erro inesperado. Tente novamente mais tarde.",
         variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Login em progresso...",
-        description: "Você será redirecionado em breve."
       });
     }
   };
@@ -77,24 +87,25 @@ const Login = () => {
       return;
     }
 
-    const { data: signUpData, error } = await supabase.auth.signUp({
-      email: registerData.email,
-      password: registerData.password,
-      options: {
-        data: {
-          name: registerData.name,
-          role: registerData.role 
+    try {
+      const { data: signUpData, error } = await supabase.auth.signUp({
+        email: registerData.email,
+        password: registerData.password,
+        options: {
+          data: {
+            name: registerData.name,
+            role: registerData.role 
+          }
         }
-      }
-    });
-
-    if (error) {
-      toast({
-        title: "Erro ao fazer cadastro",
-        description: error.message || "Não foi possível criar a conta.",
-        variant: "destructive"
       });
-    } else if (signUpData.user) {
+
+      if (error) {
+        toast({
+          title: "Erro ao fazer cadastro",
+          description: error.message || "Não foi possível criar a conta.",
+          variant: "destructive"
+        });
+      } else if (signUpData.user) {
         if (signUpData.user.identities && signUpData.user.identities.length === 0) {
             toast({
                 title: "Erro ao fazer cadastro",
@@ -107,6 +118,14 @@ const Login = () => {
                 description: "Bem-vindo! Você será redirecionado."
             });
         }
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Erro ao fazer cadastro",
+        description: "Ocorreu um erro inesperado. Tente novamente mais tarde.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -119,6 +138,15 @@ const Login = () => {
         </div>
         
         <div className="bg-white p-8 rounded-lg shadow-lg">
+          <Button 
+            variant="ghost" 
+            className="mb-4 flex items-center text-gray-600 hover:text-primary"
+            onClick={() => navigate('/')}
+          >
+            <ChevronLeft className="mr-1 h-4 w-4" />
+            Voltar para a Página Inicial
+          </Button>
+          
           <Tabs defaultValue="login" value={tab} onValueChange={(value) => setTab(value as "login" | "register")}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Login</TabsTrigger>

@@ -16,75 +16,120 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Start true
+  const [isLoading, setIsLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const loadUserProfile = async (supabaseUser: SupabaseUser, currentSession: Session) => {
-    // 1. Buscar perfil
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', supabaseUser.id)
-      .single();
+    try {
+      // 1. Buscar perfil
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
 
-    if (profileError || !profile) {
-      console.error("Error fetching profile or profile not found:", profileError?.message);
+      if (profileError || !profile) {
+        console.error("Error fetching profile or profile not found:", profileError?.message);
+        setUser(null);
+        setSession(null);
+        // Avoid calling signOut if the auth event was already SIGNED_OUT or USER_DELETED
+        if (currentSession) {
+           await supabase.auth.signOut();
+        }
+        return;
+      }
+
+      // 2. Buscar papel do usuário
+      const { data: userRoleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', supabaseUser.id)
+        .single();
+
+      if (roleError || !userRoleData) {
+        console.error("Error fetching user role or role not found:", roleError?.message);
+        setUser(null);
+        setSession(null);
+        if (currentSession) {
+          await supabase.auth.signOut();
+        }
+        return;
+      }
+      
+      const fullUser: User = {
+        ...profile,
+        role: userRoleData.role as UserRole,
+      };
+      
+      setUser(fullUser);
+      setSession(currentSession);
+    } catch (error) {
+      console.error("Unexpected error loading user profile:", error);
       setUser(null);
       setSession(null);
-      // Avoid calling signOut if the auth event was already SIGNED_OUT or USER_DELETED
-      // This helps prevent potential loops if signOut itself is problematic.
-      if (currentSession) { // Only attempt signOut if there was a session context.
-         await supabase.auth.signOut();
-      }
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    // 2. Buscar papel do usuário
-    const { data: userRoleData, error: roleError } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', supabaseUser.id)
-      .single();
-
-    if (roleError || !userRoleData) {
-      console.error("Error fetching user role or role not found:", roleError?.message);
-      setUser(null);
-      setSession(null);
-      if (currentSession) {
-        await supabase.auth.signOut();
-      }
-      return;
-    }
-    
-    const fullUser: User = {
-      ...profile,
-      role: userRoleData.role as UserRole,
-    };
-    setUser(fullUser);
-    setSession(currentSession); // Keep session in sync
   };
   
   useEffect(() => {
-    setIsLoading(true); // Ensure loading is true when effect starts
+    let mounted = true;
+    
+    // First, check the current session once on mount
+    const initialSessionCheck = async () => {
+      try {
+        setIsLoading(true);
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        // Only process if component is still mounted
+        if (!mounted) return;
+        
+        if (currentSession?.user) {
+          await loadUserProfile(currentSession.user, currentSession);
+        } else {
+          setUser(null);
+          setSession(null);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error checking initial session:", error);
+        setUser(null);
+        setSession(null);
+        setIsLoading(false);
+      } finally {
+        if (mounted) {
+          setAuthChecked(true);
+        }
+      }
+    };
 
+    initialSessionCheck();
+
+    // Then setup the auth listener for subsequent changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         console.log(`Auth event: ${event}`, newSession);
-        setIsLoading(true); // Set loading true when auth state is being processed
-        setSession(newSession);
+        
+        if (!mounted) return;
+        
+        setIsLoading(true);
+        
         if (newSession?.user) {
           await loadUserProfile(newSession.user, newSession);
         } else {
-          setUser(null); // User is null if session is null (e.g., after logout)
+          setUser(null);
+          setSession(null);
+          setIsLoading(false);
         }
-        setIsLoading(false); // Done processing this auth change
       }
     );
 
-    // Clean up listener on unmount
+    // Clean up both effects when unmounting
     return () => {
+      mounted = false;
       authListener?.subscription?.unsubscribe();
     };
-  }, []); // Empty dependency array ensures this runs once on mount
+  }, []);
 
   const login = async () => {
     // ... keep existing code (login placeholder function) ...
@@ -92,14 +137,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    // supabase.auth.signOut() will trigger onAuthStateChange
-    // onAuthStateChange will then handle setting user, session to null and isLoading to false.
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Error logging out:", error.message);
-      // As a fallback, if signOut fails, manually clear state and set loading false
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error logging out:", error.message);
+      }
+      // onAuthStateChange will handle setting user and session to null
+    } catch (error) {
+      console.error("Unexpected error during logout:", error);
+      // As a fallback, manually clear state
       setUser(null);
       setSession(null);
+    } finally {
       setIsLoading(false);
     }
   };
