@@ -1,9 +1,22 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { UserProvider, useUser } from "./context/UserContext";
+import { ExamProvider } from "@/context/ExamContext"; // Adicionado ExamProvider
+
+// Importações das páginas
+import Index from "@/pages/Index";
+import Login from "@/pages/Login";
+import ProfessorDashboard from "@/pages/ProfessorDashboard";
+import CreateExam from "@/pages/CreateExam";
+import StudentDashboard from "@/pages/StudentDashboard";
+import TakeExam from "@/pages/TakeExam"; // Assumindo que está em @/pages/TakeExam
+import ExamResultPage from "@/pages/ExamResult";
+import NotFound from "@/pages/NotFound";
+
 
 const queryClient = new QueryClient();
 
@@ -112,3 +125,4 @@ const App = () => (
 );
 
 export default App;
+
