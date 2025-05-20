@@ -23,25 +23,26 @@ Você pode acessar a aplicação diretamente pela internet:
 
 ### 📝 Área de Login
 
-![Cadastro de Estudos](public/images/login.png)
+![Área de Login](public/images/login.png)
 
 ---
 
 ### 📊 Área de Cadastro
 
-![Painel de Progresso](public/images/cadastro.png)
+![Área de Cadastro](public/images/cadastro.png)
 
 ---
 
 ### 📝 Área de Alunos
 
-![Cadastro de Estudos](public/images/tela-aluno.png)
+![Área de Alunos](public/images/tela-aluno.png)
 
 ---
 
 ### 📝 Área do professor
 
-![Cadastro de Estudos](public/images/tela-professor.png)
+![Área do professor
+](public/images/tela-professor.png)
 
 ---
 
