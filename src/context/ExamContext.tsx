@@ -1,6 +1,6 @@
-
 import React, { createContext, useState, useContext, ReactNode } from "react";
 import { Exam, ExamSubmission } from "@/types";
+import { useNavigate } from "react-router-dom";
 
 type ExamContextType = {
   exams: Exam[];
@@ -12,6 +12,7 @@ type ExamContextType = {
   getExamsForStudent: () => Exam[];
   getSubmissionsByExamId: (examId: string) => ExamSubmission[];
   getSubmissionsByStudentId: (studentId: string) => ExamSubmission[];
+  deleteExam: (examId: string) => void;
 };
 
 const ExamContext = createContext<ExamContextType | undefined>(undefined);
@@ -19,9 +20,10 @@ const ExamContext = createContext<ExamContextType | undefined>(undefined);
 export const ExamProvider = ({ children }: { children: ReactNode }) => {
   const [exams, setExams] = useState<Exam[]>([]);
   const [examSubmissions, setExamSubmissions] = useState<ExamSubmission[]>([]);
+  const navigate = useNavigate();
 
   const createExam = (exam: Exam) => {
-    setExams([...exams, exam]);
+    setExams(prevExams => [...prevExams, exam]);
   };
 
   const submitExam = (submission: ExamSubmission) => {
@@ -43,7 +45,7 @@ export const ExamProvider = ({ children }: { children: ReactNode }) => {
     const score = exam.questions.length > 0 ? (correctAnswers / exam.questions.length) * 100 : 0;
     const submissionWithScore = { ...submission, score };
     
-    setExamSubmissions([...examSubmissions, submissionWithScore]);
+    setExamSubmissions(prevSubmissions => [...prevSubmissions, submissionWithScore]);
   };
 
   const getExamById = (id: string) => {
@@ -68,6 +70,11 @@ export const ExamProvider = ({ children }: { children: ReactNode }) => {
     return examSubmissions.filter(submission => submission.student_id === studentId);
   };
 
+  const deleteExam = (examId: string) => {
+    setExams(prevExams => prevExams.filter(exam => exam.id !== examId));
+    navigate('/professor/dashboard');
+  };
+
   return (
     <ExamContext.Provider value={{
       exams,
@@ -78,7 +85,8 @@ export const ExamProvider = ({ children }: { children: ReactNode }) => {
       getExamsByProfessorId,
       getExamsForStudent,
       getSubmissionsByExamId,
-      getSubmissionsByStudentId
+      getSubmissionsByStudentId,
+      deleteExam
     }}>
       {children}
     </ExamContext.Provider>

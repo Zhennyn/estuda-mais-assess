@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { UserProvider, useUser } from "./context/UserContext";
 import { ExamProvider } from "@/context/ExamContext"; // Adicionado ExamProvider
+import { ProfessorExamDetails } from "@/components/professor/ProfessorExamDetails"; // Adicionar import
 
 // Importações das páginas
 import Index from "@/pages/Index";
@@ -16,7 +16,6 @@ import StudentDashboard from "@/pages/StudentDashboard";
 import TakeExam from "@/pages/TakeExam"; // Assumindo que está em @/pages/TakeExam
 import ExamResultPage from "@/pages/ExamResult";
 import NotFound from "@/pages/NotFound";
-
 
 const queryClient = new QueryClient();
 
@@ -73,7 +72,7 @@ const AppRoutes = () => (
       path="/professor/exam/:examId" 
       element={
         <ProtectedRoute allowedRole="professor">
-          <div>Detalhes da Prova (A implementar)</div>
+          <ProfessorExamDetails /> {/* Atualizado para ProfessorExamDetails */}
         </ProtectedRoute>
       } 
     />
@@ -125,4 +124,3 @@ const App = () => (
 );
 
 export default App;
-
