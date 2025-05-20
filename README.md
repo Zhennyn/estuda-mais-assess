@@ -120,4 +120,5 @@ bun run dev
   - Sendo um App nosso meio de emula-lo no computador seria utilizando expo porem ocorreram conflitos tanto do emulador quanto do código em si.
   - Atualizações futuras a serem feitas serão colocas a teste primeiro e depois serão lançadas.
   - Devido a pouca quantidade de tempo foi necessário o uso da platafroma lovable para correção de alguns bugs problematicos e para hospedagem utilizamos o vercel
+  - Acho melhor explicar o que seria um PWA, PWAs são aplicações web que oferecem uma experiência semelhante a um aplicativo nativo, com características como funcionamento offline, notificações push, instalação no dispositivo e um ícone na tela inicial. 
 
