@@ -5,8 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { UserProvider, useUser } from "./context/UserContext";
-import { ExamProvider } from "@/context/ExamContext"; // Adicionado ExamProvider
-import { ProfessorExamDetails } from "@/components/professor/ProfessorExamDetails"; // Adicionar import
+import { ExamProvider } from "@/context/ExamContext";
+import { ProfessorExamDetails } from "@/components/professor/ProfessorExamDetails";
 
 // Importações das páginas
 import Index from "@/pages/Index";
@@ -14,7 +14,7 @@ import Login from "@/pages/Login";
 import ProfessorDashboard from "@/pages/ProfessorDashboard";
 import CreateExam from "@/pages/CreateExam";
 import StudentDashboard from "@/pages/StudentDashboard";
-import TakeExam from "@/pages/TakeExam"; // Assumindo que está em @/pages/TakeExam
+import TakeExam from "@/pages/TakeExam";
 import ExamResultPage from "@/pages/ExamResult";
 import NotFound from "@/pages/NotFound";
 
@@ -25,22 +25,21 @@ const ProtectedRoute = ({
   children, 
   allowedRole 
 }: { 
-  children: React.ReactNode, // Changed from JSX.Element to React.ReactNode
+  children: React.ReactNode,
   allowedRole?: "professor" | "student"
 }) => {
-  const { user, isLoading, session } = useUser(); // Add isLoading and session
+  const { user, isLoading, session } = useUser();
   
   if (isLoading) {
-    // You can replace this with a more sophisticated loading spinner component
     return <div className="flex justify-center items-center min-h-screen">Carregando...</div>;
   }
   
-  if (!user || !session) { // Check for both user and active session
+  if (!user || !session) {
     return <Navigate to="/login" replace />;
   }
   
   if (allowedRole && user.role !== allowedRole) {
-    return <Navigate to={`/${user.role}/dashboard`} replace />; // Redirect to their own dashboard
+    return <Navigate to={`/${user.role}/dashboard`} replace />;
   }
   
   return children;
@@ -73,7 +72,7 @@ const AppRoutes = () => (
       path="/professor/exam/:examId" 
       element={
         <ProtectedRoute allowedRole="professor">
-          <ProfessorExamDetails /> {/* Atualizado para ProfessorExamDetails */}
+          <ProfessorExamDetails />
         </ProtectedRoute>
       } 
     />
@@ -111,15 +110,15 @@ const AppRoutes = () => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <UserProvider>
-      <ExamProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      <BrowserRouter>
+        <ExamProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
             <AppRoutes />
-          </BrowserRouter>
-        </TooltipProvider>
-      </ExamProvider>
+          </TooltipProvider>
+        </ExamProvider>
+      </BrowserRouter>
     </UserProvider>
   </QueryClientProvider>
 );
