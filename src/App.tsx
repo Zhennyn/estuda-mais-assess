@@ -1,3 +1,4 @@
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,7 +25,7 @@ const ProtectedRoute = ({
   children, 
   allowedRole 
 }: { 
-  children: JSX.Element,
+  children: React.ReactNode, // Changed from JSX.Element to React.ReactNode
   allowedRole?: "professor" | "student"
 }) => {
   const { user, isLoading, session } = useUser(); // Add isLoading and session
