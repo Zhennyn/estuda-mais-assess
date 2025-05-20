@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "@/context/UserContext";
@@ -6,6 +5,9 @@ import { useExam } from "@/context/ExamContext";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { CheckCircle2, XCircle } from "lucide-react"; // Icons for status
+
+const PASSING_SCORE = 60; // Define passing score threshold
 
 export const StudentExamList = () => {
   const { user } = useUser();
@@ -16,11 +18,10 @@ export const StudentExamList = () => {
   const exams = getExamsForStudent();
   const submissions = getSubmissionsByStudentId(user.id);
   
-  // Filter out exams that have already been submitted
   const submittedExamIds = submissions.map(s => s.exam_id);
   const availableExams = exams.filter(exam => !submittedExamIds.includes(exam.id));
   
-  if (exams.length === 0) {
+  if (exams.length === 0 && availableExams.length === 0 && submissions.length === 0) {
     return (
       <div className="text-center py-8">
         <h3 className="text-xl font-medium text-gray-600">Nenhuma prova disponível no momento.</h3>
@@ -41,7 +42,7 @@ export const StudentExamList = () => {
                 <h3 className="text-lg font-semibold">{exam.title}</h3>
                 
                 {exam.description && (
-                  <p className="text-gray-600 mt-1">{exam.description}</p>
+                  <p className="text-gray-600 mt-1 text-sm">{exam.description}</p>
                 )}
                 
                 <div className="mt-3 text-sm text-gray-500">
@@ -73,16 +74,23 @@ export const StudentExamList = () => {
               const exam = exams.find(e => e.id === submission.exam_id);
               if (!exam) return null;
               
+              const score = submission.score || 0;
+              const isApproved = score >= PASSING_SCORE;
+              
               return (
                 <div key={submission.id} className="border rounded-lg p-4 shadow-sm bg-gray-50">
                   <h3 className="text-lg font-semibold">{exam.title}</h3>
                   
-                  <div className="mt-3 text-sm text-gray-500">
+                  <div className="mt-3 text-sm text-gray-500 space-y-1">
                     <div>Concluído: {formatDistanceToNow(new Date(submission.submitted_at), { 
                       addSuffix: true,
                       locale: ptBR 
                     })}</div>
-                    <div className="font-medium text-primary">Nota: {submission.score?.toFixed(1)}%</div>
+                    <div className="font-medium">Nota: <span className={isApproved ? "text-green-600" : "text-red-600"}>{score.toFixed(1)}%</span></div>
+                     <div className={`flex items-center text-sm font-semibold ${isApproved ? "text-green-600" : "text-red-600"}`}>
+                      {isApproved ? <CheckCircle2 size={16} className="mr-1" /> : <XCircle size={16} className="mr-1" />}
+                      {isApproved ? "Aprovado" : "Reprovado"}
+                    </div>
                   </div>
                   
                   <div className="mt-4">
@@ -94,6 +102,13 @@ export const StudentExamList = () => {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {availableExams.length === 0 && submissions.length === 0 && exams.length > 0 && (
+         <div className="text-center py-8">
+            <h3 className="text-xl font-medium text-gray-600">Você já concluiu todas as provas disponíveis.</h3>
+            <p className="mt-2 text-gray-500">Aguarde novas provas serem liberadas.</p>
         </div>
       )}
     </div>

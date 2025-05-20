@@ -1,21 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { UserProvider } from "@/context/UserContext";
-import { ExamProvider } from "@/context/ExamContext";
-
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import ProfessorDashboard from "./pages/ProfessorDashboard";
-import StudentDashboard from "./pages/StudentDashboard";
-import CreateExam from "./pages/CreateExam";
-import TakeExam from "./pages/TakeExam";
-import ExamResultPage from "./pages/ExamResult";
-import NotFound from "./pages/NotFound";
-import { useUser } from "./context/UserContext";
+import { UserProvider, useUser } from "./context/UserContext";
 
 const queryClient = new QueryClient();
 
@@ -27,14 +15,19 @@ const ProtectedRoute = ({
   children: JSX.Element,
   allowedRole?: "professor" | "student"
 }) => {
-  const { user } = useUser();
+  const { user, isLoading, session } = useUser(); // Add isLoading and session
   
-  if (!user) {
+  if (isLoading) {
+    // You can replace this with a more sophisticated loading spinner component
+    return <div className="flex justify-center items-center min-h-screen">Carregando...</div>;
+  }
+  
+  if (!user || !session) { // Check for both user and active session
     return <Navigate to="/login" replace />;
   }
   
   if (allowedRole && user.role !== allowedRole) {
-    return <Navigate to={`/${user.role}/dashboard`} replace />;
+    return <Navigate to={`/${user.role}/dashboard`} replace />; // Redirect to their own dashboard
   }
   
   return children;

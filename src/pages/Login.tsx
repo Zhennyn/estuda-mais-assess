@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/context/UserContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const { toast } = useToast();
@@ -25,6 +26,9 @@ const Login = () => {
     password: "",
     role: "student" as "professor" | "student"
   });
+
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
 
   useEffect(() => {
     if (!isLoading && user && session) {
@@ -132,17 +136,30 @@ const Login = () => {
                       placeholder="seu@email.com" 
                       value={loginData.email}
                       onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                      autoComplete="email"
                     />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="password-login">Senha</Label>
-                    <Input 
-                      id="password-login" 
-                      type="password" 
-                      value={loginData.password}
-                      onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                    />
+                    <div className="relative">
+                      <Input 
+                        id="password-login" 
+                        type={showLoginPassword ? "text" : "password"} 
+                        value={loginData.password}
+                        onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                        autoComplete="current-password"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      >
+                        {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </Button>
+                    </div>
                   </div>
                   
                   <Button type="submit" className="w-full" disabled={isLoading}>
@@ -162,6 +179,7 @@ const Login = () => {
                       placeholder="Seu nome completo" 
                       value={registerData.name}
                       onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
+                      autoComplete="name"
                     />
                   </div>
                   
@@ -173,40 +191,55 @@ const Login = () => {
                       placeholder="seu@email.com" 
                       value={registerData.email}
                       onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
+                      autoComplete="email"
                     />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="password-register">Senha</Label>
-                    <Input 
-                      id="password-register" 
-                      type="password" 
-                      value={registerData.password}
-                      onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
-                    />
+                    <div className="relative">
+                      <Input 
+                        id="password-register" 
+                        type={showRegisterPassword ? "text" : "password"} 
+                        value={registerData.password}
+                        onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+                        autoComplete="new-password"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                      >
+                        {showRegisterPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label>Tipo de Usuário</Label>
                     <div className="flex space-x-4">
-                      <label className="flex items-center space-x-2">
+                      <label className="flex items-center space-x-2 cursor-pointer">
                         <input 
                           type="radio" 
                           name="role" 
                           value="student"
                           checked={registerData.role === "student"} 
                           onChange={() => setRegisterData({...registerData, role: "student"})} 
+                          className="form-radio"
                         />
                         <span>Aluno</span>
                       </label>
                       
-                      <label className="flex items-center space-x-2">
+                      <label className="flex items-center space-x-2 cursor-pointer">
                         <input 
                           type="radio" 
                           name="role" 
                           value="professor"
                           checked={registerData.role === "professor"} 
                           onChange={() => setRegisterData({...registerData, role: "professor"})} 
+                          className="form-radio"
                         />
                         <span>Professor</span>
                       </label>

@@ -1,8 +1,10 @@
-
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { useExam } from "@/context/ExamContext";
 import { Button } from "@/components/ui/button";
+import { CheckCircle2, XCircle } from "lucide-react"; // Icons for status
+
+const PASSING_SCORE = 60; // Define passing score threshold
 
 export const ExamResult = () => {
   const { submissionId } = useParams();
@@ -38,6 +40,7 @@ export const ExamResult = () => {
   }).length;
   
   const score = submission.score || 0;
+  const isApproved = score >= PASSING_SCORE;
   
   return (
     <div className="max-w-3xl mx-auto">
@@ -48,7 +51,13 @@ export const ExamResult = () => {
       
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
         <div className="flex justify-between items-center pb-4 border-b">
-          <h2 className="text-lg font-medium">Pontuação</h2>
+          <div>
+            <h2 className="text-lg font-medium">Pontuação</h2>
+            <div className={`mt-1 flex items-center ${isApproved ? "text-green-600" : "text-red-600"}`}>
+              {isApproved ? <CheckCircle2 className="mr-2" /> : <XCircle className="mr-2" />}
+              <span className="font-semibold">{isApproved ? "Aprovado" : "Reprovado"}</span>
+            </div>
+          </div>
           <div className="text-2xl font-bold">{score.toFixed(1)}%</div>
         </div>
         
@@ -95,6 +104,8 @@ export const ExamResult = () => {
                         bgColor = "bg-red-100 border-red-300";
                       } else if (isCorrectOption) {
                         bgColor = "bg-green-50 border-green-200";
+                      } else {
+                        bgColor = "bg-white border-gray-200"; // Default for non-selected, non-correct options
                       }
                       
                       return (
@@ -105,8 +116,14 @@ export const ExamResult = () => {
                           <div className="flex items-center">
                             <div className="w-6 text-gray-500">{String.fromCharCode(65 + oIndex)}.</div>
                             <span>{option.text}</span>
-                            {isCorrectOption && (
-                              <span className="ml-2 text-green-600 text-sm">✓ Correta</span>
+                            {isCorrectOption && !isUserSelection && ( // Show if it's correct and user didn't pick it
+                              <span className="ml-2 text-green-700 text-xs font-medium">(Correta)</span>
+                            )}
+                             {isUserSelection && isCorrectOption && (
+                              <span className="ml-2 text-green-700 text-xs font-medium">✓ Sua Resposta Correta</span>
+                            )}
+                            {isUserSelection && !isCorrectOption && (
+                              <span className="ml-2 text-red-700 text-xs font-medium">✗ Sua Resposta Incorreta</span>
                             )}
                           </div>
                         </div>
@@ -117,12 +134,12 @@ export const ExamResult = () => {
                 
                 <div className="ml-4 flex-shrink-0">
                   {isCorrect ? (
-                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                      ✓
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600" title="Correta">
+                      <CheckCircle2 size={20}/>
                     </div>
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                      ✗
+                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600" title="Incorreta">
+                      <XCircle size={20}/>
                     </div>
                   )}
                 </div>
