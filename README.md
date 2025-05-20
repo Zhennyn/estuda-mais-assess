@@ -1,73 +1,104 @@
-# Welcome to your Lovable project
+# 📚 Estuda Mais Assess
 
-## Project info
+**Estuda Mais Assess** é uma aplicação voltada para o gerenciamento e acompanhamento de estudos. Com uma interface moderna e intuitiva, o projeto busca ajudar estudantes a organizarem seus cronogramas, tarefas e progresso de forma eficiente e visual.
 
-**URL**: https://lovable.dev/projects/48b385e4-c785-4498-8bee-91a0f6a333c4
+---
 
-## How can I edit this code?
+## 🌐 Acesse Online
 
-There are several ways of editing your application.
+Você pode acessar a aplicação diretamente pela internet:
 
-**Use Lovable**
+👉 [estuda-mais-assess.vercel.app](https://evalplus-smart-assess.vercel.app)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/48b385e4-c785-4498-8bee-91a0f6a333c4) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🖼️ Imagens de Demonstração
 
-**Use your preferred IDE**
+> ⚠️ Para que as imagens apareçam corretamente, salve os arquivos na pasta `public/images/` conforme os nomes abaixo.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 📌 Tela Inicial
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+![Tela Inicial](public/images/tela-inicial.png)
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 📝 Cadastro de Estudos
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+![Cadastro de Estudos](public/images/cadastro-estudos.png)
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### 📊 Painel de Progresso
+
+![Painel de Progresso](public/images/painel-progresso.png)
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+Este projeto foi desenvolvido com as seguintes tecnologias:
+
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Vite](https://vitejs.dev/)
+- [Supabase](https://supabase.com/)
+- [Bun](https://bun.sh/) – runtime moderno para JavaScript/TypeScript
+
+---
+
+## 📁 Estrutura de Pastas
+
+```bash
+estuda-mais-assess/
+├── public/                 # Arquivos públicos
+│   └── images/             # Imagens da aplicação (prints, logos, etc.)
+├── src/                    # Código-fonte principal
+├── supabase/               # Configurações do Supabase
+├── .gitignore
+├── README.md
+├── bun.lockb
+├── components.json
+├── eslint.config.js
+├── index.html
+├── package.json
+├── postcss.config.js
+├── tailwind.config.ts
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+#🚀 Como Rodar Localmente
 
-**Use GitHub Codespaces**
+  Pré-requisitos
+  Ter o Bun instalado
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+  Passo a passo
 
-## What technologies are used for this project?
+```bash
+# 1. Clone o repositório
+git clone https://github.com/Zhennyn/estuda-mais-assess.git
 
-This project is built with:
+# 2. Acesse o diretório do projeto
+cd estuda-mais-assess
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# 3. Instale as dependências com o Bun
+bun install
 
-## How can I deploy this project?
+# 4. Rode o servidor de desenvolvimento
+bun run dev
 
-Simply open [Lovable](https://lovable.dev/projects/48b385e4-c785-4498-8bee-91a0f6a333c4) and click on Share -> Publish.
+```
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+#👤 Autores
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Matheus Lima Menezes
+Eduardo Lopes Ferreira Filho
+Abraão Joventino Crispiano
+André Luiz Fernandes
+Lucas José Vicentini
