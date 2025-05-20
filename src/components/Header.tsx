@@ -18,13 +18,20 @@ export const Header = () => {
               <span className="text-sm">
                 Olá, {user.name} ({user.role === "professor" ? "Professor" : "Aluno"})
               </span>
-              <Button variant="outline" className="text-white border-white hover:bg-white hover:text-primary" onClick={logout}>
+              <Button 
+                variant="outline" 
+                className="bg-transparent text-white border-white hover:bg-white hover:text-primary focus:ring-white" 
+                onClick={logout}
+              >
                 Sair
               </Button>
             </>
           ) : (
             <Link to="/login">
-              <Button variant="outline" className="text-white border-white hover:bg-white hover:text-primary">
+              <Button 
+                variant="outline" 
+                className="bg-transparent text-white border-white hover:bg-white hover:text-primary focus:ring-white"
+              >
                 Entrar
               </Button>
             </Link>
@@ -34,3 +41,4 @@ export const Header = () => {
     </header>
   );
 };
+

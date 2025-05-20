@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,7 @@ const Index = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="text-white border-white hover:bg-white hover:text-primary"
+              className="bg-transparent text-white border-white hover:bg-white hover:text-primary focus:ring-white"
               onClick={() => navigate("/login")}
             >
               Começar Agora
