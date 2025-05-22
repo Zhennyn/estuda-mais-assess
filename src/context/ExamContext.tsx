@@ -1,18 +1,22 @@
+
 import React, { createContext, useState, useContext, ReactNode } from "react";
-import { Exam, ExamSubmission } from "@/types";
-import { useNavigate } from "react-router-dom";
+import { Exam, ExamSubmission }
+from "@/types";
+// useNavigate foi removido daqui pois não é usado diretamente no Provider de forma que cause o erro.
+// Se for necessário para alguma função específica, deve ser chamado dentro dessa função ou passado como argumento.
 
 type ExamContextType = {
   exams: Exam[];
   examSubmissions: ExamSubmission[];
   createExam: (exam: Exam) => void;
+  updateExam: (updatedExam: Exam) => void; // Nova função
   submitExam: (submission: ExamSubmission) => void;
   getExamById: (id: string) => Exam | undefined;
   getExamsByProfessorId: (professorId: string) => Exam[];
   getExamsForStudent: () => Exam[];
   getSubmissionsByExamId: (examId: string) => ExamSubmission[];
   getSubmissionsByStudentId: (studentId: string) => ExamSubmission[];
-  deleteExam: (examId: string) => void;
+  deleteExam: (examId: string, navigate: (path: string) => void) => void; // Adicionado navigate como parâmetro
 };
 
 const ExamContext = createContext<ExamContextType | undefined>(undefined);
@@ -20,10 +24,17 @@ const ExamContext = createContext<ExamContextType | undefined>(undefined);
 export const ExamProvider = ({ children }: { children: ReactNode }) => {
   const [exams, setExams] = useState<Exam[]>([]);
   const [examSubmissions, setExamSubmissions] = useState<ExamSubmission[]>([]);
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Removido daqui para evitar erro fora do Router.
 
   const createExam = (exam: Exam) => {
     setExams(prevExams => [...prevExams, exam]);
+  };
+
+  // Nova função para atualizar uma prova existente
+  const updateExam = (updatedExam: Exam) => {
+    setExams(prevExams =>
+      prevExams.map(exam => (exam.id === updatedExam.id ? updatedExam : exam))
+    );
   };
 
   const submitExam = (submission: ExamSubmission) => {
@@ -70,9 +81,11 @@ export const ExamProvider = ({ children }: { children: ReactNode }) => {
     return examSubmissions.filter(submission => submission.student_id === studentId);
   };
 
-  const deleteExam = (examId: string) => {
+  // Modificado para aceitar navigate como parâmetro
+  const deleteExam = (examId: string, navigateCallback: (path: string) => void) => {
     setExams(prevExams => prevExams.filter(exam => exam.id !== examId));
-    navigate('/professor/dashboard');
+    // A navegação agora é feita pelo componente que chama deleteExam
+    // navigateCallback('/professor/dashboard');
   };
 
   return (
@@ -80,6 +93,7 @@ export const ExamProvider = ({ children }: { children: ReactNode }) => {
       exams,
       examSubmissions,
       createExam,
+      updateExam, // Adicionado ao contexto
       submitExam,
       getExamById,
       getExamsByProfessorId,

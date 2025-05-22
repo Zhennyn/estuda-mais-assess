@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useExam } from "@/context/ExamContext";
@@ -33,6 +32,7 @@ import { ptBR } from "date-fns/locale";
 const MOCK_USER_PROFILES: { [key: string]: { name?: string; email?: string } } = {
   "student1_id": { name: "Aluno Exemplo 1", email: "aluno1@example.com" },
   "student2_id": { name: "Aluna Teste B", email: "aluno2@example.com" },
+  // Adicione mais perfis mockados conforme necessário
 };
 
 const getStudentName = (studentId: string, profiles: typeof MOCK_USER_PROFILES) => {
@@ -61,12 +61,18 @@ export const ProfessorExamDetails = () => {
 
   const handleDeleteExam = () => {
     if (examId) {
-      deleteExam(examId);
+      deleteExam(examId, navigate); // Modificado para passar navigate
       toast({
         title: "Prova Excluída",
         description: `A prova "${exam.title}" foi excluída com sucesso.`,
       });
-      navigate("/professor/dashboard");
+      navigate("/professor/dashboard"); 
+    }
+  };
+
+  const handleEditExam = () => {
+    if (examId) {
+      navigate(`/professor/edit-exam/${examId}`); // Navega para a nova página de edição
     }
   };
 
@@ -81,7 +87,7 @@ export const ProfessorExamDetails = () => {
           </div>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm" onClick={() => alert("Editar prova - A implementar")}>
+          <Button variant="outline" size="sm" onClick={handleEditExam}>
             <Edit className="mr-2 h-4 w-4" /> Editar
           </Button>
           <AlertDialog>
@@ -145,10 +151,10 @@ export const ProfessorExamDetails = () => {
                 {submissions.map((submission) => (
                   <TableRow key={submission.id}>
                     <TableCell className="font-medium">
-                      {getStudentName(submission.student_id, MOCK_USER_PROFILES)} {/* Usar o nome do aluno */}
+                      {getStudentName(submission.student_id, MOCK_USER_PROFILES)}
                     </TableCell>
                     <TableCell className={`text-right font-semibold ${submission.score && submission.score >= 60 ? 'text-green-600' : 'text-red-600'}`}>
-                      {submission.score !== null ? `${submission.score.toFixed(1)}%` : "N/A"}
+                      {submission.score !== null && submission.score !== undefined ? `${submission.score.toFixed(1)}%` : "N/A"}
                     </TableCell>
                     <TableCell>
                       {format(new Date(submission.submitted_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}

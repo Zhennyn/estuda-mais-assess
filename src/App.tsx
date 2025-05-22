@@ -13,6 +13,7 @@ import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import ProfessorDashboard from "@/pages/ProfessorDashboard";
 import CreateExam from "@/pages/CreateExam";
+import EditExamPage from "@/pages/EditExamPage";
 import StudentDashboard from "@/pages/StudentDashboard";
 import TakeExam from "@/pages/TakeExam";
 import ExamResultPage from "@/pages/ExamResult";
@@ -39,7 +40,9 @@ const ProtectedRoute = ({
   }
   
   if (allowedRole && user.role !== allowedRole) {
-    return <Navigate to={`/${user.role}/dashboard`} replace />;
+    // Se o usuário não tem a role permitida, redireciona para o dashboard da role dele ou login se não tiver role dashboard
+    const targetDashboard = user.role === "professor" ? "/professor/dashboard" : user.role === "student" ? "/student/dashboard" : "/login";
+    return <Navigate to={targetDashboard} replace />;
   }
   
   return children;
@@ -76,6 +79,14 @@ const AppRoutes = () => (
         </ProtectedRoute>
       } 
     />
+    <Route 
+      path="/professor/edit-exam/:examId" 
+      element={
+        <ProtectedRoute allowedRole="professor">
+          <EditExamPage />
+        </ProtectedRoute>
+      } 
+    />
     
     {/* Student routes */}
     <Route 
@@ -107,6 +118,7 @@ const AppRoutes = () => (
   </Routes>
 );
 
+// App component wrapping providers
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <UserProvider>
