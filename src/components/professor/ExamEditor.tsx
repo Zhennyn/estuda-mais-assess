@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller, UseFormWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -46,32 +45,16 @@ interface ExamEditorProps {
 }
 
 export const ExamEditor: React.FC<ExamEditorProps> = ({ examId }) => {
-  const { getExamById, updateExam, exams } = useExam(); // Adicionado exams para forçar re-render se necessário
+  const { getExamById, updateExam } = useExam();
   const navigate = useNavigate();
-  const [initialExamData, setInitialExamData] = useState<Exam | null>(null);
-
+  
   const examToEdit = getExamById(examId);
 
   const { register, control, handleSubmit, formState: { errors }, reset, watch } = useForm<ExamFormData>({
     resolver: zodResolver(examSchema),
-    defaultValues: async () => {
-      if (examToEdit) {
-        setInitialExamData(examToEdit); // Guardar os dados iniciais para referência se necessário
-        return {
-          title: examToEdit.title,
-          description: examToEdit.description || '',
-          duration: examToEdit.duration,
-          questions: examToEdit.questions.map(q => ({
-            ...q,
-            options: q.options.map(o => ({ ...o })) // Garante cópias profundas
-          }))
-        };
-      }
-      return { title: '', description: '', duration: 60, questions: [] };
-    }
+    // Default values will be set by the useEffect below once examToEdit is available
   });
   
-  // Reset form when examToEdit data changes (e.g. fetched after initial render)
   useEffect(() => {
     if (examToEdit) {
       reset({
@@ -79,10 +62,19 @@ export const ExamEditor: React.FC<ExamEditorProps> = ({ examId }) => {
         description: examToEdit.description || '',
         duration: examToEdit.duration,
         questions: examToEdit.questions.map(q => ({
-          ...q,
-          options: q.options.map(o => ({ ...o }))
+          id: q.id,
+          text: q.text,
+          options: q.options.map(o => ({ 
+            id: o.id,
+            text: o.text,
+            is_correct: o.is_correct 
+          }))
         }))
       });
+    } else {
+      // Handle case where exam is not found after trying to fetch, though EditExamPage should catch this.
+      // For now, initialize with empty/default if examToEdit is null/undefined initially
+       reset({ title: '', description: '', duration: 60, questions: [] });
     }
   }, [examToEdit, reset]);
 
@@ -97,19 +89,39 @@ export const ExamEditor: React.FC<ExamEditorProps> = ({ examId }) => {
       toast({ title: "Erro", description: "Prova original não encontrada para atualização.", variant: "destructive" });
       return;
     }
+    const now = new Date().toISOString();
+
     const updatedExam: Exam = {
-      ...examToEdit, // Preserva created_by e outros campos não editáveis no formulário
-      ...data,
-      id: examId, // Garante que o ID seja o original
-      questions: data.questions.map(q => ({
-        ...q,
-        exam_id: examId, // Garante que exam_id esteja presente em cada questão
-        options: q.options.map(o => ({
-            ...o,
-            question_id: q.id, // Garante que question_id esteja presente em cada opção
-        }))
-      })),
+      ...examToEdit, // Preserva id, created_by, original created_at
+      title: data.title,
+      description: data.description,
+      duration: data.duration,
+      updated_at: now, // Update exam's updated_at
+      questions: data.questions.map(q_form => {
+        const originalQuestion = examToEdit.questions.find(oq => oq.id === q_form.id);
+        return {
+          // Spread q_form first to get id, text
+          id: q_form.id,
+          text: q_form.text,
+          exam_id: examId, // Ensure exam_id is present
+          created_at: originalQuestion ? originalQuestion.created_at : now,
+          updated_at: now,
+          options: q_form.options.map(opt_form => {
+            const originalOption = originalQuestion?.options.find(oo => oo.id === opt_form.id);
+            return {
+              // Spread opt_form first to get id, text, is_correct
+              id: opt_form.id,
+              text: opt_form.text,
+              is_correct: opt_form.is_correct,
+              question_id: q_form.id, // Ensure question_id is present
+              created_at: originalOption ? originalOption.created_at : now,
+              updated_at: now,
+            };
+          }),
+        };
+      }),
     };
+
     updateExam(updatedExam);
     toast({
       title: 'Prova Atualizada!',
@@ -119,23 +131,24 @@ export const ExamEditor: React.FC<ExamEditorProps> = ({ examId }) => {
   };
 
   const handleAddQuestion = () => {
+    const newQuestionId = uuidv4();
     appendQuestion({
-      id: uuidv4(),
+      id: newQuestionId,
       text: '',
       options: [
         { id: uuidv4(), text: '', is_correct: false },
         { id: uuidv4(), text: '', is_correct: false },
       ],
+      // Ensure schema-compatible structure, `exam_id` etc are added in onSubmit
     });
   };
 
-  if (!examToEdit && !initialExamData) {
-     // Se examToEdit ainda não carregou, pode mostrar um loading ou aguardar o useEffect.
-     // Se não encontrou de forma alguma, EditExamPage trata isso.
-     // Este return é um fallback caso o defaultValues demore.
+  if (!examToEdit) {
+    // This check is now more robust due to useEffect.
+    // EditExamPage should handle the case where examId is invalid or exam truly not found.
+    // Showing a loading state while examToEdit is initially undefined and useEffect hasn't run.
     return <p>Carregando dados da prova...</p>;
   }
-
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -176,7 +189,13 @@ export const ExamEditor: React.FC<ExamEditorProps> = ({ examId }) => {
               {errors.questions?.[qIndex]?.text && <p className="text-sm text-destructive">{errors.questions[qIndex]?.text?.message}</p>}
               {errors.questions?.[qIndex]?.options?.message && <p className="text-sm text-destructive">{errors.questions[qIndex]?.options?.message}</p>}
             </div>
-            <OptionsEditor questionIndex={qIndex} control={control} register={register} errors={errors} />
+            <OptionsEditor 
+              questionIndex={qIndex} 
+              control={control} 
+              register={register} 
+              errors={errors} 
+              watch={watch} // Pass watch here
+            />
           </CardContent>
         </Card>
       ))}
@@ -198,8 +217,16 @@ export const ExamEditor: React.FC<ExamEditorProps> = ({ examId }) => {
   );
 };
 
+interface OptionsEditorProps {
+  questionIndex: number;
+  control: any; // Consider using Control<ExamFormData>
+  register: any; // Consider using UseFormRegister<ExamFormData>
+  errors: any; // Consider using FieldErrors<ExamFormData>
+  watch: UseFormWatch<ExamFormData>; // Use imported UseFormWatch
+}
+
 // Componente aninhado para gerenciar opções
-const OptionsEditor = ({ questionIndex, control, register, errors }: any) => {
+const OptionsEditor: React.FC<OptionsEditorProps> = ({ questionIndex, control, register, errors, watch }) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: `questions.${questionIndex}.options`,
@@ -209,6 +236,7 @@ const OptionsEditor = ({ questionIndex, control, register, errors }: any) => {
     append({ id: uuidv4(), text: '', is_correct: false });
   };
   
+  // watch is now correctly passed and typed
   const currentOptions = watch(`questions.${questionIndex}.options`);
 
   return (
@@ -238,13 +266,7 @@ const OptionsEditor = ({ questionIndex, control, register, errors }: any) => {
                 <Checkbox
                   id={`questions.${questionIndex}.options.${oIndex}.is_correct`}
                   checked={field.value}
-                  onCheckedChange={(checked) => {
-                    // Lógica para garantir que apenas uma opção seja correta (radio button behavior)
-                    // Se você quiser permitir múltiplas corretas, remova esta lógica.
-                    // Para este exemplo, vamos manter como checkbox normal, o schema já valida se PELO MENOS UMA é correta.
-                    // Se quiser UMA E SOMENTE UMA, a lógica aqui precisaria desmarcar as outras.
-                    field.onChange(checked);
-                  }}
+                  onCheckedChange={field.onChange} // Simplified
                 />
               )}
             />
@@ -260,7 +282,10 @@ const OptionsEditor = ({ questionIndex, control, register, errors }: any) => {
        {errors.questions?.[questionIndex]?.options?.message && (
             <p className="text-sm text-destructive">{errors.questions[questionIndex]?.options?.message}</p>
         )}
+       {/* Display error if less than 2 options after adding/removing, or if no correct option */}
+       {errors.questions?.[questionIndex]?.options?.root?.message && (
+            <p className="text-sm text-destructive">{errors.questions[questionIndex]?.options?.root?.message}</p>
+        )}
     </div>
   );
 };
-
