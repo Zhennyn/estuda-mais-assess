@@ -1,94 +1,46 @@
 # 📚 Estuda Mais Assess
 
-**Estuda Mais Assess** é uma aplicação voltada para o gerenciamento e acompanhamento de estudos. Com uma interface moderna e intuitiva, o projeto busca ajudar estudantes a organizarem seus cronogramas, tarefas e progresso de forma eficiente e visual.
-
----
-
-## 🌐 Acesse Online
-
-Você pode acessar a aplicação diretamente pela internet:
-
-👉 [estuda-mais-assess.vercel.app](https://estuda-mais-acess.vercel.app)
-
----
-
-## 🖼️ Imagens de Demonstração
-
-
-### 📌 Tela Inicial
+> Plataforma web de gerenciamento de avaliações educacionais — conectando professores e alunos em um ambiente moderno e intuitivo.
 
 ![Tela Inicial](public/images/tela-inicial.png)
 
 ---
 
-### 📝 Área de Login
+## ✨ Funcionalidades
 
-![Área de Login](public/images/login.png)
-
----
-
-### 📊 Área de Cadastro
-
-![Área de Cadastro](public/images/cadastro.png)
-
----
-
-### 📝 Área de Alunos
-
-![Área de Alunos](public/images/tela-aluno.png)
-
----
-
-### 📝 Área do professor
-
-![Área do professor
-](public/images/tela-professor.png)
+- 🔐 **Autenticação segura** — login e cadastro com controle de acesso por perfil (aluno / professor)
+- 👨‍🏫 **Painel do Professor** — criação, edição e gerenciamento completo de avaliações
+- 🎓 **Painel do Aluno** — visualização e realização de provas de forma simples e responsiva
+- 📝 **Criação de Questões** — formulário dinâmico para montar avaliações personalizadas
+- 📊 **Resultados em tempo real** — alunos visualizam o desempenho logo após a submissão
+- 📱 **PWA (Progressive Web App)** — instalável no dispositivo, experiência próxima a um app nativo
+- ☁️ **Backend em nuvem** — dados persistidos e autenticação via Supabase (BaaS)
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-Este projeto foi desenvolvido com as seguintes tecnologias:
-
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Vite](https://vitejs.dev/)
-- [Supabase](https://supabase.com/)
-- [Bun](https://bun.sh/) – runtime moderno para JavaScript/TypeScript
-
----
-
-## 📁 Estrutura de Pastas
-
-```bash
-estuda-mais-assess/
-├── public/                 # Arquivos públicos
-│   └── images/             # Imagens da aplicação (prints, logos, etc.)
-├── src/                    # Código-fonte principal
-├── supabase/               # Configurações do Supabase
-├── .gitignore
-├── README.md
-├── bun.lockb
-├── components.json
-├── eslint.config.js
-├── index.html
-├── package.json
-├── postcss.config.js
-├── tailwind.config.ts
-├── tsconfig.app.json
-├── tsconfig.json
-├── tsconfig.node.json
-└── vite.config.ts
-```
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Radix UI](https://img.shields.io/badge/Radix_UI-161618?style=for-the-badge&logo=radix-ui&logoColor=white)
+![React Hook Form](https://img.shields.io/badge/React_Hook_Form-EC5990?style=for-the-badge&logo=reacthookform&logoColor=white)
+![Recharts](https://img.shields.io/badge/Recharts-FF6384?style=for-the-badge&logo=chart.js&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
 ---
 
-🚀 Como Rodar Localmente
+## 🚀 Como executar localmente
 
-  Pré-requisitos
-  Ter o Bun instalado
+### Pré-requisitos
 
-  Passo a passo
+- [Bun](https://bun.sh/) instalado (`curl -fsSL https://bun.sh/install | bash`)
+- Conta no [Supabase](https://supabase.com/) para configurar as variáveis de ambiente
+
+### Passo a passo
 
 ```bash
 # 1. Clone o repositório
@@ -97,29 +49,83 @@ git clone https://github.com/Zhennyn/estuda-mais-assess.git
 # 2. Acesse o diretório do projeto
 cd estuda-mais-assess
 
-# 3. Instale as dependências com o Bun
+# 3. Instale as dependências
 bun install
 
-# 4. Rode o servidor de desenvolvimento
-bun run dev
+# 4. Configure as variáveis de ambiente
+# Crie um arquivo .env na raiz com suas credenciais do Supabase:
+# VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+# VITE_SUPABASE_ANON_KEY=sua-chave-publica
 
+# 5. Inicie o servidor de desenvolvimento
+bun run dev
 ```
+
+> A aplicação estará disponível em `http://localhost:5173`
 
 ---
 
-👤 Autores
+## 📸 Screenshots
 
-  - Matheus Lima Menezes
-  - Eduardo Lopes Ferreira Filho
-  - Abraão Joventino Crispiano
-  - André Luiz Fernandes
-  - Lucas José Vicentini
+### 🏠 Tela Inicial
+![Tela Inicial](public/images/tela-inicial.png)
 
-👀 Observações
+### 🔑 Área de Login
+![Área de Login](public/images/login.png)
 
-  - O projeto ainda está em desenvolvimento mas pela falta de tempo devido a bugs e sistemas caindo sofrerá uma leve pausa onde originalmente seria um app acabou virando um web/app em termos técnicos um PWAs(Progressive Web App).
-  - Sendo um App nosso meio de emula-lo no computador seria utilizando expo porem ocorreram conflitos tanto do emulador quanto do código em si.
-  - Atualizações futuras a serem feitas serão colocas a teste primeiro e depois serão lançadas.
-  - Devido a pouca quantidade de tempo foi necessário o uso da platafroma lovable para correção de alguns bugs problematicos e para hospedagem utilizamos o vercel
-  - Acho melhor explicar o que seria um PWA, PWAs são aplicações web que oferecem uma experiência semelhante a um aplicativo nativo, com características como funcionamento offline, notificações push, instalação no dispositivo e um ícone na tela inicial. 
+### 📋 Cadastro
+![Cadastro](public/images/cadastro.png)
+
+### 🎓 Painel do Aluno
+![Painel do Aluno](public/images/tela-aluno.png)
+
+### 👨‍🏫 Painel do Professor
+![Painel do Professor](public/images/tela-professor.png)
+
+---
+
+## 🌐 Demonstração
+
+🔗 **Acesse o projeto em produção:** [estuda-mais-acess.vercel.app](https://estuda-mais-acess.vercel.app)
+
+> Hospedado na **Vercel** com deploy contínuo a partir do branch principal.
+
+---
+
+## 📌 Sobre o projeto
+
+O **Estuda Mais Assess** é uma plataforma educacional full-stack desenvolvida como projeto acadêmico em 2024. A aplicação conecta professores e alunos por meio de um sistema de avaliações online, com autenticação por perfil, gerenciamento de provas e visualização de resultados.
+
+**Por que esse projeto é relevante para recrutadores de TI?**
+
+| Habilidade | Aplicação no projeto |
+|---|---|
+| 🗄️ Banco de Dados em Nuvem | Supabase (PostgreSQL gerenciado) |
+| 🔐 Autenticação & Controle de Acesso | Perfis distintos: aluno e professor |
+| ☁️ Deploy em Nuvem | Vercel + Supabase (arquitetura serverless) |
+| 📊 Visualização de Dados | Recharts para exibição de resultados |
+| 🧩 Componentização & Reutilização | shadcn/ui + Radix UI |
+| 📱 PWA | Experiência mobile sem loja de apps |
+| 🔄 Integração Frontend/Backend | React Query + Supabase REST API |
+
+---
+
+## 👥 Equipe
+
+- Matheus Lima Menezes
+- Eduardo Lopes Ferreira Filho
+- Abraão Joventino Crispiano
+- André Luiz Fernandes
+- Lucas José Vicentini
+
+---
+
+<div align="center">
+
+Feito com ❤️ por **Zhennyn** e equipe
+
+⭐ Se este projeto te ajudou ou te inspirou, deixe uma estrela!  
+🤝 Contribuições, sugestões e feedbacks são sempre bem-vindos — abra uma [issue](https://github.com/Zhennyn/estuda-mais-assess/issues) ou envie um PR!
+
+</div>
 
